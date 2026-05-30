@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Commute Tax</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-label">Team 16 &nbsp;|&nbsp; Data Visualization &nbsp;|&nbsp; UC Davis</div>
+  <h1 class="hero-title">THE<br><span>COMMUTE</span><br>TAX</h1>
+  <p class="hero-sub">Americans are spending more and more time commuting every year. Here is what the data actually shows.</p>
+  <div class="hero-stats">
+    <div class="stat-block">
+      <div class="stat-num" id="counter">0+</div>
+      <div class="stat-label">Hours lost per year</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">27 min</div>
+      <div class="stat-label">US avg one-way commute</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">50 states</div>
+      <div class="stat-label">14 years of Census data</div>
+    </div>
+  </div>
+  <div class="scroll-cue">Scroll to explore</div>
+</section>
+
+<!-- ── SCROLLYTELLING STORY ──────────────────────────────────────── -->
+<div id="story">
+
+  <!-- Left: sticky chart -->
+  <div class="story-viz">
+    <div class="viz-title">Parallel Coordinates</div>
+    <div class="viz-subtitle">
+      Each line = 1 US state &nbsp;|&nbsp;
+      Each axis = 1 year &nbsp;|&nbsp;
+      Height = avg commute (min) &nbsp;|&nbsp;
+      Color = region
+    </div>
+    <svg id="chart-svg"></svg>
+    <div class="legend" id="legend"></div>
+    <p class="viz-note" id="viz-note">Each line is one US state. Each axis is one year. Higher = longer commute.</p>
+  </div>
+
+  <!-- Right: scroll steps -->
+  <div class="story-steps">
+
+    <!-- Step 1: Intro -->
+    <div class="step active" data-step="0">
+      <div class="step-num">01</div>
+      <div class="step-title">Every state, every year</div>
+      <div class="step-body">
+        This chart shows 50 US states across 14 years of Census data. Each colored line is one state. Each vertical axis is one year from 2010 to 2024. Follow a line left to right to see how its commute time changed over the years.
+      </div>
+    </div>
+
+    <!-- Step 2: Rising trend -->
+    <div class="step" data-step="1">
+      <div class="step-num">02</div>
+      <div class="step-title">A decade of rising commutes</div>
+      <div class="step-body">
+        From 2010 to 2019, commute times went up in almost every state, every single year. Every region. The lines all move upward together.
+      </div>
+      <span class="step-highlight">10 straight years of growth</span>
+
+      <div class="fact-card" data-step="1">
+        <div class="fact-card-label">Did you know?</div>
+        By 2019, about <strong>9% of US workers</strong> were spending
+        <strong>60 minutes or more</strong> commuting each way, every workday.
+        That is over 14 million people.
+      </div>
+    </div>
+
+    <!-- Step 3: Northeast -->
+    <div class="step" data-step="2">
+      <div class="step-num">03</div>
+      <div class="step-title">The Northeast bears the most</div>
+      <div class="step-body">
+        The red lines, which are Northeast states, sit at the top on almost every axis. States like New York, New Jersey, and Maryland are consistently above 30 minutes average.
+      </div>
+      <span class="step-highlight" style="color:var(--ne)">Northeast: 28+ min avg</span>
+
+      <div class="fact-card" data-step="2" style="border-left-color:var(--ne)">
+        <div class="fact-card-label" style="color:var(--ne)">New York fact</div>
+        In 2024, <strong>17.2%</strong> of New York workers commuted
+        <strong>60 or more minutes</strong> each way. That is about 1 in 6 workers
+        spending over 2 hours a day just getting to and from work.
+      </div>
+    </div>
+
+    <!-- Step 4: COVID dip -->
+    <div class="step" data-step="3">
+      <div class="step-num">04</div>
+      <div class="step-title">COVID changed everything for a bit</div>
+      <div class="step-body">
+        In 2021, every single line drops at that axis. Remote work cut commutes across the whole country. It was the first time in 10 years that commutes went down.
+      </div>
+      <span class="step-highlight" style="color:var(--teal)">2021: First drop in 10 years</span>
+
+      <div class="fact-card" data-step="3" style="border-left-color:var(--teal)">
+        <div class="fact-card-label" style="color:var(--teal)">The COVID numbers</div>
+        The average Northeast commute dropped from
+        <strong>28.4 min</strong> in 2019 to <strong>26.3 min</strong> in 2021.
+        That works out to about <strong>35 extra hours a year</strong> that
+        workers got back just by staying home a few days a week.
+      </div>
+    </div>
+
+    <!-- Step 5: Rebound -->
+    <div class="step" data-step="4">
+      <div class="step-num">05</div>
+      <div class="step-title">Then it was taken back</div>
+      <div class="step-body">
+        By 2022 and 2024, the lines went right back up. Once offices reopened, commutes came back too. The Northeast hit 28.1 minutes average in 2024, close to where it was before COVID.
+      </div>
+      <span class="step-highlight" style="color:var(--accent)">2024: Back to peak levels</span>
+
+      <div class="fact-card" data-step="4">
+        <div class="fact-card-label">California fact</div>
+        California's average commute is <strong>29.7 minutes</strong> in 2024,
+        but <strong>12.1%</strong> of workers there commute
+        <strong>60 or more minutes</strong> each way. The average hides a big
+        group of people with really long drives, especially around LA and the Bay Area.
+      </div>
+    </div>
+
+    <!-- Step 6: Explore -->
+    <div class="step" data-step="5">
+      <div class="step-num">06</div>
+      <div class="step-title">Now it is yours to explore</div>
+      <div class="step-body">
+        Hover any line to see that state's commute times and what percent of workers there commute 60 or more minutes. Use the filters below to look at specific regions.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── EXPLORE SECTION ───────────────────────────────────────────── -->
+<section id="explore">
+  <div class="section-label">Free exploration</div>
+  <h2 class="section-title">Find Your State</h2>
+  <p class="section-body">
+    Pick a region to focus on, or keep all states shown. Hover any line to see
+    that state's commute times over the years and how many workers there
+    commute 60 or more minutes each way.
+  </p>
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-region="all">All regions</button>
+    <button class="filter-btn" data-region="Northeast">Northeast</button>
+    <button class="filter-btn" data-region="South">South</button>
+    <button class="filter-btn" data-region="Midwest">Midwest</button>
+    <button class="filter-btn" data-region="West">West</button>
+    <button class="filter-btn" data-region="Mountain">Mountain</button>
+  </div>
+  <svg id="explore-svg"></svg>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────── -->
+<footer>
+  <p>
+    <strong>The Commute Tax</strong> &nbsp;|&nbsp; Team 16<br>
+    Michael Yeung, Tanner Nguyen, Lance Arnoco, Quanin Li, Michael Makhota
+  </p>
+  <p style="text-align:right">
+    Data: US Census Bureau ACS Table S0801 (data.census.gov)<br>
+    Visualization: D3.js v7 &nbsp;|&nbsp;
+    2010–2024 &nbsp;(*2020 unavailable: COVID disrupted Census collection)
+  </p>
+</footer>
+
+<!-- ── TOOLTIP ───────────────────────────────────────────────────── -->
+<div id="tooltip"></div>
+
+<!-- ── SCRIPTS ───────────────────────────────────────────────────── -->
+<script src="data.js"></script>
+<script src="chart.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
