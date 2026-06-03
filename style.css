@@ -65,14 +65,15 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 #story { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; border-top: 1px solid var(--border); }
 .story-viz {
   position: sticky; top: 0; height: 100vh;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 1.8rem 2.5rem;
+  display: flex; flex-direction: column;
+  padding: 1.4rem 2rem 1rem;
   border-right: 1px solid var(--border);
   background: var(--bg2);
+  overflow: hidden;
 }
-.viz-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--text); letter-spacing: .06em; margin-bottom: .35rem; }
-.viz-subtitle { font-size: .72rem; color: var(--muted); margin-bottom: .8rem; line-height: 1.5; }
-#chart-svg { width: 100%; display: block; flex: 1; }
+.viz-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--text); letter-spacing: .06em; margin-bottom: .25rem; flex-shrink: 0; }
+.viz-subtitle { font-size: .72rem; color: var(--muted); margin-bottom: .5rem; line-height: 1.5; flex-shrink: 0; }
+#chart-svg { width: 100%; display: block; flex: 1; min-height: 0; }
 .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin-top: .7rem; }
 .legend-item { display: flex; align-items: center; gap: .45rem; font-size: .75rem; color: var(--muted); cursor: pointer; padding: .2rem .5rem; border-radius: 4px; transition: all .2s; }
 .legend-item:hover { color: var(--text); background: var(--bg3); }
@@ -109,6 +110,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
   pointer-events: none; opacity: 0; transition: opacity .15s; z-index: 1000;
   max-width: 240px; line-height: 1.65; box-shadow: 0 16px 40px rgba(0,0,0,.6);
 }
+#tooltip.pinned { border-color: rgba(255,107,53,0.4); box-shadow: 0 16px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,107,53,0.2); }
 .tt-state { font-weight: 700; font-size: .95rem; margin-bottom: .3rem; }
 .tt-region { font-size: .7rem; color: var(--muted); margin-bottom: .6rem; text-transform: uppercase; letter-spacing: .1em; }
 .tt-row { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); font-size: .8rem; margin: .12rem 0; }

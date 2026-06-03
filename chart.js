@@ -1,4 +1,4 @@
-// chart.js - D3 parallel coordinates chart builder
+// chart.js - builds the parallel coordinates chart
 // Data: US Census Bureau ACS Table S0801 (data.census.gov)
 
 const YEARS = ["2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2021","2022","2023","2024"];
@@ -17,7 +17,8 @@ const AXIS_ANNOTS = {
   "2024": { text: "most recent",    color: "#8A9EAE" },
 };
 
-// Build tooltip HTML for a state
+// ── Tooltip ───────────────────────────────────────────────────
+// Builds the HTML shown when a user clicks a state line
 function buildTooltipHTML(d) {
   const ch = (d["2024"] - d["2010"]).toFixed(1);
   const cc = parseFloat(ch) > 0 ? "#e85d4a" : "#2ab89a";
@@ -38,11 +39,14 @@ function buildTooltipHTML(d) {
   `;
 }
 
-// Main chart builder
-// Returns { paths, xs, ys } for later manipulation
+// ── Chart Builder ─────────────────────────────────────────────
+// Draws the full parallel coordinates chart into svgEl
+// clickMode "tooltip" = story chart, click shows info without dimming others
+// clickMode "lock"    = explore chart, click locks state and dims the rest
+// Returns { paths, xs, ys, deselect } for use by main.js
 function buildChart(svgEl, data, W, H, margin, opts = {}) {
-  const { region = "all", animate = false, activeOpacity = 0.3,
-          onHover, onLeave } = opts;
+  const { region = "all", animate = false, activeOpacity = 0.75,
+          onClick, onLeave, clickMode = null } = opts;
 
   const iW = W - margin.left - margin.right;
   const iH = H - margin.top  - margin.bottom;
@@ -51,7 +55,8 @@ function buildChart(svgEl, data, W, H, margin, opts = {}) {
   sel.selectAll("*").remove();
   const g = sel.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Scales
+  // ── Scales ────────────────────────────────────────────────────
+  // X: one position per year, Y: shared commute time range
   const xs = d3.scalePoint().domain(YEARS).range([0, iW]).padding(0.1);
   const allV = data.flatMap(d => YEARS.map(y => d[y]).filter(v => v != null));
   const ys = d3.scaleLinear()
@@ -62,7 +67,8 @@ function buildChart(svgEl, data, W, H, margin, opts = {}) {
     YEARS.filter(y => d[y] != null).map(y => [xs(y), ys(d[y])])
   );
 
-  // Grid lines
+  // ── Grid Lines ────────────────────────────────────────────────
+  // Faint horizontal guides behind the data lines
   ys.ticks(6).forEach(t => {
     g.append("line")
       .attr("x1", 0).attr("x2", iW)
@@ -71,7 +77,8 @@ function buildChart(svgEl, data, W, H, margin, opts = {}) {
       .attr("stroke-dasharray", "3 5");
   });
 
-  // Axes
+  // ── Axes ──────────────────────────────────────────────────────
+  // One vertical axis per year, with year label on top and annotations below
   YEARS.forEach(y => {
     const ax = g.append("g").attr("transform", `translate(${xs(y)},0)`);
     ax.call(d3.axisLeft(ys).ticks(5).tickFormat(d => d + "m").tickSize(3))
@@ -102,29 +109,30 @@ function buildChart(svgEl, data, W, H, margin, opts = {}) {
     }
   });
 
-  // Filter data
+  // ── Draw Lines ────────────────────────────────────────────────
+  // One path per state, colored by region
   const filtered = region !== "all"
     ? data.filter(d => d.region === region)
     : data;
 
-  // Draw lines
   const paths = g.selectAll(".sline").data(filtered).join("path")
     .attr("class","sline")
     .attr("d", lineGen)
     .attr("fill","none")
     .attr("stroke", d => REGION_COLORS[d.region])
-    .attr("stroke-width",  animate ? 0   : 1.0)
+    .attr("stroke-width",  animate ? 0   : 1.6)
     .attr("stroke-opacity", animate ? 0  : activeOpacity)
-    .style("cursor","pointer");
+    .style("cursor", clickMode ? "pointer" : "default");
 
-  // Animated reveal - lines draw in one by one
+  // ── Animated Reveal ───────────────────────────────────────────
+  // Lines draw in one by one when the chart first appears
   if (animate) {
     paths.each(function(d, i) {
       const len = this.getTotalLength() || 300;
       d3.select(this)
         .attr("stroke-dasharray", `${len} ${len}`)
         .attr("stroke-dashoffset", len)
-        .attr("stroke-width", 1.1)
+        .attr("stroke-width", 1.6)
         .attr("stroke-opacity", activeOpacity)
         .transition()
         .delay(i * 16)
@@ -134,18 +142,74 @@ function buildChart(svgEl, data, W, H, margin, opts = {}) {
     });
   }
 
-  // Hover interactions
-  paths
-    .on("mouseover", function(event, d) {
-      paths.attr("stroke-opacity", 0.04).attr("stroke-width", 0.5);
-      d3.select(this).attr("stroke-opacity",1).attr("stroke-width",3).raise();
-      if (onHover) onHover(event, d);
-    })
-    .on("mousemove", (event, d) => { if (onHover) onHover(event, d); })
-    .on("mouseleave", function() {
-      paths.attr("stroke-opacity", activeOpacity).attr("stroke-width", 1.0);
+  // ── Click Mode: Tooltip ───────────────────────────────────────
+  // Used in the story chart. Click highlights that line but keeps
+  // all other lines at their step-applied opacity.
+  if (clickMode === "tooltip") {
+    let selected = null;
+
+    function restorePrev() {
+      if (!selected) return;
+      d3.select(selected)
+        .attr("stroke-width",   selected.__origW)
+        .attr("stroke-opacity", selected.__origO);
+    }
+
+    function deselectTooltip() {
+      restorePrev();
+      selected = null;
       if (onLeave) onLeave();
+    }
+
+    sel.on("click", function(event) {
+      if (event.target === svgEl || event.target.tagName === "svg") deselectTooltip();
     });
 
-  return { paths, xs, ys };
+    paths.on("click", function(event, d) {
+      event.stopPropagation();
+      if (selected === this) { deselectTooltip(); return; }
+      restorePrev();
+      selected = this;
+      this.__origW = d3.select(this).attr("stroke-width");
+      this.__origO = d3.select(this).attr("stroke-opacity");
+      d3.select(this).attr("stroke-width", 3.5).attr("stroke-opacity", 1).raise();
+      if (onClick) onClick(event, d);
+    });
+
+    return { paths, xs, ys, deselect: deselectTooltip };
+  }
+
+  // ── Click Mode: Lock ──────────────────────────────────────────
+  // Used in the explore chart. Click locks that state and dims everything else.
+  if (clickMode === "lock") {
+    let selected = null;
+
+    function deselectLock() {
+      if (!selected) return;
+      selected = null;
+      paths.transition().duration(300)
+        .attr("stroke-opacity", activeOpacity).attr("stroke-width", 1.6);
+      if (onLeave) onLeave();
+    }
+
+    sel.on("click", function(event) {
+      if (event.target === svgEl || event.target.tagName === "svg") deselectLock();
+    });
+
+    paths.on("click", function(event, d) {
+      event.stopPropagation();
+      if (selected === this) { deselectLock(); return; }
+      selected = this;
+      paths.transition().duration(300)
+        .attr("stroke-opacity", 0.1).attr("stroke-width", 0.8);
+      d3.select(this).transition().duration(300)
+        .attr("stroke-opacity", 1).attr("stroke-width", 3.5);
+      d3.select(this).raise();
+      if (onClick) onClick(event, d);
+    });
+
+    return { paths, xs, ys, deselect: deselectLock };
+  }
+
+  return { paths, xs, ys, deselect: () => {} };
 }

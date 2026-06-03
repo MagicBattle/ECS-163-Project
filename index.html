@@ -46,7 +46,7 @@
     </div>
     <svg id="chart-svg"></svg>
     <div class="legend" id="legend"></div>
-    <p class="viz-note" id="viz-note">Each line is one US state. Each axis is one year. Higher = longer commute.</p>
+    <p class="viz-note" id="viz-note">Each line is one US state. Each axis is one year. Click any line to see that state's numbers.</p>
   </div>
 
   <!-- Right: scroll steps -->
@@ -100,7 +100,7 @@
       <div class="step-num">04</div>
       <div class="step-title">COVID changed everything for a bit</div>
       <div class="step-body">
-        In 2021, every single line drops at that axis. Remote work cut commutes across the whole country. It was the first time in 10 years that commutes went down.
+        In 2021, every single line drops at that axis. California fell from 30.7 to 27.6 minutes. New York dropped from 33 to 30. Remote work cut commutes for the first time in 10 years.
       </div>
       <span class="step-highlight" style="color:var(--teal)">2021: First drop in 10 years</span>
 
@@ -113,12 +113,12 @@
       </div>
     </div>
 
-    <!-- Step 5: Rebound -->
+    <!-- Step 5: Rebound + call to explore below -->
     <div class="step" data-step="4">
       <div class="step-num">05</div>
       <div class="step-title">Then it was taken back</div>
       <div class="step-body">
-        By 2022 and 2024, the lines went right back up. Once offices reopened, commutes came back too. The Northeast hit 28.1 minutes average in 2024, close to where it was before COVID.
+        By 2022 and 2024, the lines went right back up. California climbed from 27.6 back to 29.7. New York rebounded to 33 minutes. Once offices reopened, commutes came back too.
       </div>
       <span class="step-highlight" style="color:var(--accent)">2024: Back to peak levels</span>
 
@@ -129,15 +129,10 @@
         <strong>60 or more minutes</strong> each way. The average hides a big
         group of people with really long drives, especially around LA and the Bay Area.
       </div>
-    </div>
 
-    <!-- Step 6: Explore -->
-    <div class="step" data-step="5">
-      <div class="step-num">06</div>
-      <div class="step-title">Now it is yours to explore</div>
-      <div class="step-body">
-        Hover any line to see that state's commute times and what percent of workers there commute 60 or more minutes. Use the filters below to look at specific regions.
-      </div>
+      <p style="margin-top:1.8rem;color:var(--accent);font-size:.95rem;font-weight:500;letter-spacing:.02em">
+        ↓ Scroll down to find your state: click any line to see its numbers
+      </p>
     </div>
 
   </div>
@@ -148,9 +143,9 @@
   <div class="section-label">Free exploration</div>
   <h2 class="section-title">Find Your State</h2>
   <p class="section-body">
-    Pick a region to focus on, or keep all states shown. Hover any line to see
-    that state's commute times over the years and how many workers there
-    commute 60 or more minutes each way.
+    Pick a region to focus on, or keep all states shown. Click any line to lock that
+    state in focus and see its commute times over the years, plus how many workers
+    there commute 60 or more minutes each way.
   </p>
   <div class="filter-bar" id="filter-bar">
     <button class="filter-btn active" data-region="all">All regions</button>
@@ -161,6 +156,7 @@
     <button class="filter-btn" data-region="Mountain">Mountain</button>
   </div>
   <svg id="explore-svg"></svg>
+  <p id="explore-note" style="font-size:.75rem;color:#8A9EAE;margin-top:.6rem;transition:opacity .3s;opacity:0.7">Click any line to lock it in focus. Click again or click empty space to deselect.</p>
 </section>
 
 <!-- ── FOOTER ────────────────────────────────────────────────────── -->
@@ -172,7 +168,7 @@
   <p style="text-align:right">
     Data: US Census Bureau ACS Table S0801 (data.census.gov)<br>
     Visualization: D3.js v7 &nbsp;|&nbsp;
-    2010–2024 &nbsp;(*2020 unavailable: COVID disrupted Census collection)
+    2010-2024 &nbsp;(*2020 unavailable: COVID disrupted Census collection)
   </p>
 </footer>
 
