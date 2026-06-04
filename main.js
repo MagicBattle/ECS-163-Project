@@ -197,30 +197,52 @@ function drawSpotlightLabels(stateNames, chart) {
 }
 
 // ── Scrollytelling ────────────────────────────────────────────
-// Watches which step is in view and updates the chart accordingly
+// Finds whichever step center is closest to the viewport center.
+// old method sometimes skipped steps, so I swapped to this method
 const steps = document.querySelectorAll(".step");
 const factCards = document.querySelectorAll(".fact-card");
 
-const stepObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    const idx = parseInt(entry.target.dataset.step);
-    if (idx === currentStepIdx && storyInited) return;
-    currentStepIdx = idx;
-
-    steps.forEach(s => s.classList.remove("active"));
-    entry.target.classList.add("active");
-
-    storyInited = true;
-    applyStep(idx);
-
-    factCards.forEach(card => {
-      card.classList.toggle("visible", parseInt(card.dataset.step) === idx);
-    });
+function getClosestStep() {
+  const mid = window.innerHeight * 0.5;
+  let closest = null;
+  let closestDist = Infinity;
+  steps.forEach(step => {
+    const rect = step.getBoundingClientRect();
+    const stepMid = (rect.top + rect.bottom) / 2;
+    const dist = Math.abs(stepMid - mid);
+    if (dist < closestDist) { closestDist = dist; closest = step; }
   });
-}, { threshold: 0.45 });
+  return closest;
+}
 
-steps.forEach(s => stepObserver.observe(s));
+function onScroll() {
+  const activeStep = getClosestStep();
+  if (!activeStep) return;
+  const idx = parseInt(activeStep.dataset.step);
+  if (idx === currentStepIdx && storyInited) return;
+  currentStepIdx = idx;
+
+  steps.forEach(s => s.classList.remove("active"));
+  activeStep.classList.add("active");
+
+  storyInited = true;
+  applyStep(idx);
+
+  factCards.forEach(card => {
+    card.classList.toggle("visible", parseInt(card.dataset.step) === idx);
+  });
+}
+
+// Limit scroll events with requestAnimationFrame
+let scrollTicking = false;
+window.addEventListener("scroll", () => {
+  if (!scrollTicking) {
+    requestAnimationFrame(() => { onScroll(); scrollTicking = false; });
+    scrollTicking = true;
+  }
+});
+
+onScroll();
 
 // ── Init Story Chart ──────────────────────────────────────────
 // Deferred until layout is settled so sizing is accurate
