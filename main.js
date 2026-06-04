@@ -270,6 +270,7 @@ requestAnimationFrame(() => requestAnimationFrame(doInitStory));
 let currentRegion = "all";
 let exploreAnimated = false;
 let exploreDeselect = () => {};
+let exploreResult = null;
 
 function getExploreSize() {
   const sec = document.getElementById("explore");
@@ -303,7 +304,7 @@ function handleExploreDeselect() {
 function redrawExplore(animate) {
   const { W, H } = getExploreSize();
   const m = { top: 60, right: 16, bottom: 44, left: 16 };
-  const exploreResult = buildChart(
+  const result = buildChart(
     document.getElementById("explore-svg"),
     RAW_DATA, W, H, m,
     {
@@ -315,7 +316,8 @@ function redrawExplore(animate) {
       onLeave: handleExploreDeselect,
     }
   );
-  exploreDeselect = exploreResult.deselect || (() => {});
+  exploreResult = result;
+  exploreDeselect = result.deselect || (() => {});
 }
 
 // Animate when explore section scrolls into view for the first time
@@ -335,9 +337,56 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
     btn.classList.add("active");
     currentRegion = btn.dataset.region;
     handleExploreDeselect();
+    // Clear search when switching region
+    const searchEl = document.getElementById("state-search");
+    if (searchEl) { searchEl.value = ""; document.getElementById("search-clear").style.display = "none"; }
     redrawExplore(true);
   });
 });
+
+// ── State Search ──────────────────────────────────────────────
+// Highlights a matching state as the user types
+const searchEl = document.getElementById("state-search");
+const clearEl  = document.getElementById("search-clear");
+
+function applySearch(query) {
+  if (!exploreResult || !exploreResult.paths) return;
+  const q = query.trim().toLowerCase();
+
+  if (!q) {
+    // Reset to normal
+    exploreResult.paths
+      .transition().duration(300)
+      .attr("stroke-opacity", currentRegion === "all" ? 0.65 : 0.85)
+      .attr("stroke-width", 1.6);
+    return;
+  }
+
+  // Find best matching state by prefix
+  const match = RAW_DATA.find(d => d.state.toLowerCase().startsWith(q));
+
+  exploreResult.paths
+    .transition().duration(300)
+    .attr("stroke-opacity", d => match && d.state === match.state ? 1 : 0.06)
+    .attr("stroke-width",   d => match && d.state === match.state ? 3.5 : 0.8);
+
+  // Raise matched line to top so it renders above everything else
+  if (match) exploreResult.paths.filter(d => d.state === match.state).raise();
+}
+
+if (searchEl) {
+  searchEl.addEventListener("input", () => {
+    const q = searchEl.value;
+    clearEl.style.display = q ? "block" : "none";
+    applySearch(q);
+  });
+
+  clearEl.addEventListener("click", () => {
+    searchEl.value = "";
+    clearEl.style.display = "none";
+    applySearch("");
+  });
+}
 
 // Redraw on window resize
 window.addEventListener("resize", () => {
