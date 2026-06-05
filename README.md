@@ -17,7 +17,8 @@ Data is from the US Census Bureau ACS Table S0801 (data.census.gov), included di
  **Execution**
 - Render: https://ecs-163-project.onrender.com
 - GitHub Pages: https://magicbattle.github.io/ECS-163-Project
-## Installation
+
+**Installation**
  
 Clone the github repo. The project is static HTML, CSS, and JS with no build step needed.
  
